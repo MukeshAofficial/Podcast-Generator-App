@@ -65,7 +65,7 @@ This application is built using a **Next.js** frontend and a **FastAPI** backend
 
         *   You can find your `fal-client` API key on the [Fal.ai dashboard](https://fal.ai).
         *   For `OPENROUTER_API_KEY`, you need to register on [openrouter.ai](https://openrouter.ai/) and generate an API key.
-        *   For `GOOGLE_API_KEY`, you need to have a [Google Cloud Project](https://console.cloud.google.com/) and enable the Gemini API.
+        *    `GOOGLE_API_KEY`
 
 3.  **Frontend Setup (Next.js):**
 
@@ -138,5 +138,5 @@ This application is built using a **Next.js** frontend and a **FastAPI** backend
     *   Click the "Generate Podcast from Document" button.
     *   The app will display the generated transcript and audio output.
 
-5. **Audio Output:** The app provides a playable audio output embedded in the Streamlit App.
-=
+5. **Audio Output:** The app provides a playable audio output
+
