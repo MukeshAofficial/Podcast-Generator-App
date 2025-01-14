@@ -30,7 +30,7 @@ This application is built using a **Next.js** frontend and a **FastAPI** backend
 1.  **Clone the repository:**
 
     ```bash
-    git clone [<repository_url>](https://github.com/MukeshAofficial/Podcast-Generator-App.git)
+    git clone https://github.com/MukeshAofficial/Podcast-Generator-App.git
     cd podcast-generator
     ```
 
