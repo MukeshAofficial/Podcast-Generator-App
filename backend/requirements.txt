@@ -11,3 +11,4 @@ pypdf
 python-docx
 langchain-google-genai
 chromadb
+langchain_chroma
