@@ -4,10 +4,10 @@ pydantic
 python-dotenv
 langchain
 langchain_openai
-fal_client
+langchain-openai
+fal-client
 langchain_community
 pypdf
 python-docx
-langchain_google_genai
-chroma
-langchain_core
+langchain-google-genai
+chromadb
