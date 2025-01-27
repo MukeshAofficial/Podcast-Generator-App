@@ -21,7 +21,7 @@ const Home = () => {
         setPodcastData(null);
         setError(null);
         try {
-            const response = await axios.post('http://localhost:8000/generate_podcast_topic', { topic });
+            const response = await axios.post('https://podcast-generator-app.onrender.com/generate_podcast_topic', { topic });
             setPodcastData(response.data);
         } catch (err) {
             setError(err.message || err.response?.data?.detail || "An unexpected error occurred!");
@@ -36,7 +36,7 @@ const Home = () => {
         setPodcastData(null);
         setError(null);
         try {
-            const response = await axios.post('http://localhost:8000/generate_podcast_url', { url, podcast_title: podcastTitle });
+            const response = await axios.post('https://podcast-generator-app.onrender.com/generate_podcast_url', { url, podcast_title: podcastTitle });
             setPodcastData(response.data);
         } catch (err) {
              setError(err.message || err.response?.data?.detail || "An unexpected error occurred!");
@@ -56,7 +56,7 @@ const Home = () => {
             formData.append("podcast_title", podcastTitle);
 
 
-            const response = await axios.post('http://localhost:8000/generate_podcast_document', formData, {
+            const response = await axios.post('https://podcast-generator-app.onrender.com/generate_podcast_document', formData, {
                 headers: {
                    'Content-Type': 'multipart/form-data',
                 },
