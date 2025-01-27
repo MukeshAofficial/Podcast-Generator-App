@@ -28,7 +28,7 @@ app = FastAPI()
 
 # CORS settings to allow requests from frontend
 origins = [
-    "http://localhost:3000",  # Replace with your Next.js frontend URL in production
+    "https://podcast-generator-app.vercel.app/",  # Replace with your Next.js frontend URL in production
 ]
 app.add_middleware(
     CORSMiddleware,
