@@ -9,8 +9,8 @@ import fal_client
 from dotenv import load_dotenv
 from langchain_community.document_loaders import WebBaseLoader
 from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
-from pypdf import PdfReader  
-from docx import Document 
+from pypdf import PdfReader
+from docx import Document
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -19,7 +19,6 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 from typing import Optional
 import logging
-
 
 
 load_dotenv()
@@ -44,15 +43,16 @@ class PodcastResponse(BaseModel):
     conversation: str
     audio_url: Optional[str] = None
     error: Optional[str] = None
-    
+
 
 # Data model for request body
 class TopicPodcastRequest(BaseModel):
     topic: str
 
+
 class UrlPodcastRequest(BaseModel):
-    url:str
-    podcast_title:str
+    url: str
+    podcast_title: str
 
 
 def extract_text_from_pdf(file_path):
@@ -88,7 +88,7 @@ def extract_text(file_path, file_type):
 
 # --- Function for Generating Podcast Transcript with RAG---
 def generate_podcast_transcript_with_rag(topic, text=None):
-     
+
     if text:
 
         # Split the document into chunks
@@ -153,7 +153,7 @@ Remember: Create completely new dialogue about {topic} based on the given contex
         rag_chain = create_retrieval_chain(retriever, question_answer_chain)
 
         response = rag_chain.invoke({"input": topic, "topic": topic})
-        
+
         # Initialize Deepseek model
         deepseek_llm = ChatOpenAI(
             model="deepseek/deepseek-chat",
@@ -165,10 +165,10 @@ Remember: Create completely new dialogue about {topic} based on the given contex
         deepseek_prompt = ChatPromptTemplate.from_messages(
             [
                 ("system", system_prompt),
-               
+
             ]
         )
-        
+
         deepseek_chain =  deepseek_prompt | deepseek_llm
 
         deepseek_response = deepseek_chain.invoke({"topic": topic, "context": response["answer"]})
@@ -208,13 +208,12 @@ Remember: Create completely new dialogue about {topic}, don't use the above exam
             openai_api_key=os.getenv("OPENROUTER_API_KEY"),
             openai_api_base="https://openrouter.ai/api/v1"
         )
-    
-    
-       
+
+
+
     chain = podcast_template | llm
     response = chain.invoke({"topic": topic})
     return response.content
-
 
 
 # --- Function for Generating Podcast with Audio ---
@@ -224,10 +223,10 @@ def generate_podcast(topic, text=None) -> PodcastResponse:
 
     # Get transcript first
     try:
-      if text:
-        transcript_result = generate_podcast_transcript_with_rag(topic, text)
-      else:
-         transcript_result = generate_podcast_transcript(topic, text)
+        if text:
+            transcript_result = generate_podcast_transcript_with_rag(topic, text)
+        else:
+            transcript_result = generate_podcast_transcript_with_rag(topic)
     except Exception as e:
         print(f"Error generating transcript: {e}")
         return PodcastResponse(conversation="", audio_url=None, error=str(e))
@@ -247,6 +246,8 @@ def generate_podcast(topic, text=None) -> PodcastResponse:
 
     # Generate audio using fal-client
     try:
+        fal_api_key = "e8efb1d2-1537-4bc5-996d-78b75a08aab2:c98b25ab01dff2d68257130e6d1b643a" #Hardcoded FAL API Key
+
         result = fal_client.subscribe(
             "fal-ai/playht/tts/ldm",
             {
@@ -262,6 +263,7 @@ def generate_podcast(topic, text=None) -> PodcastResponse:
                     },
                 ],
             },
+            api_key=fal_api_key,
             with_logs=True,
             on_queue_update=on_queue_update,
         )
@@ -277,11 +279,10 @@ def generate_podcast(topic, text=None) -> PodcastResponse:
 
 @app.post("/generate_podcast_topic", response_model=PodcastResponse)
 async def create_podcast_topic(request: TopicPodcastRequest):
-    fal_key = os.getenv("FAL_KEY")
     openrouter_key = os.getenv("OPENROUTER_API_KEY")
-    if not fal_key or not openrouter_key:
-        raise HTTPException(status_code=500, detail="Please set FAL_KEY and OPENROUTER_API_KEY as environment variables or in .env file.")
-    os.environ["FAL_KEY"] = fal_key
+    if not  openrouter_key:
+        raise HTTPException(status_code=500, detail="Please set OPENROUTER_API_KEY as environment variables or in .env file.")
+
     os.environ["OPENROUTER_API_KEY"] = openrouter_key
 
     podcast_data = generate_podcast(request.topic)
@@ -290,11 +291,10 @@ async def create_podcast_topic(request: TopicPodcastRequest):
 
 @app.post("/generate_podcast_url", response_model=PodcastResponse)
 async def create_podcast_url(request: UrlPodcastRequest):
-    fal_key = os.getenv("FAL_KEY")
     openrouter_key = os.getenv("OPENROUTER_API_KEY")
-    if not fal_key or not openrouter_key:
-        raise HTTPException(status_code=500, detail="Please set FAL_KEY and OPENROUTER_API_KEY as environment variables or in .env file.")
-    os.environ["FAL_KEY"] = fal_key
+    if not openrouter_key:
+        raise HTTPException(status_code=500, detail="Please set OPENROUTER_API_KEY as environment variables or in .env file.")
+
     os.environ["OPENROUTER_API_KEY"] = openrouter_key
 
     try:
@@ -312,11 +312,9 @@ async def create_podcast_document(
     podcast_title: str = File(...),
     uploaded_file: UploadFile = File(...)
 ):
-    fal_key = os.getenv("FAL_KEY")
     openrouter_key = os.getenv("OPENROUTER_API_KEY")
-    if not fal_key or not openrouter_key:
-        raise HTTPException(status_code=500, detail="Please set FAL_KEY and OPENROUTER_API_KEY as environment variables or in .env file.")
-    os.environ["FAL_KEY"] = fal_key
+    if not openrouter_key:
+        raise HTTPException(status_code=500, detail="Please set OPENROUTER_API_KEY as environment variables or in .env file.")
     os.environ["OPENROUTER_API_KEY"] = openrouter_key
     logging.info(f"File Upload Started")
 
@@ -324,17 +322,17 @@ async def create_podcast_document(
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             tmp_file.write(await uploaded_file.read())
             temp_file_path = tmp_file.name
-        
+
         file_extension = uploaded_file.filename.split('.')[-1].lower()
         text = extract_text(temp_file_path, file_extension)
         if text == "Unsupported file type":
            raise HTTPException(status_code=400, detail="Unsupported file type")
-        
+
         podcast_data = generate_podcast(podcast_title, text)
-    
+
         os.remove(temp_file_path)
         return podcast_data
-    
+
     except Exception as e:
         logging.error(f"Error in file upload", exc_info = True)
         raise HTTPException(status_code=500, detail=f"Error loading document or generating podcast: {str(e)}")
